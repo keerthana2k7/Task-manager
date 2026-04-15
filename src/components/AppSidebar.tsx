@@ -24,6 +24,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <Sidebar collapsible="icon">
@@ -66,7 +67,10 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer">
+            <SidebarMenuButton
+              onClick={() => navigate("/login")}
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               {!collapsed && <span>Logout</span>}
             </SidebarMenuButton>
