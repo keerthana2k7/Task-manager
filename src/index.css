@@ -5,44 +5,33 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  :root,
+  .theme-blue {
     --background: 220 20% 97%;
     --foreground: 220 20% 10%;
-
     --card: 0 0% 100%;
     --card-foreground: 220 20% 10%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 220 20% 10%;
-
     --primary: 230 70% 55%;
     --primary-foreground: 0 0% 100%;
-
     --secondary: 220 15% 93%;
     --secondary-foreground: 220 20% 20%;
-
     --muted: 220 15% 93%;
     --muted-foreground: 220 10% 50%;
-
     --accent: 230 70% 95%;
     --accent-foreground: 230 70% 40%;
-
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 220 15% 90%;
     --input: 220 15% 90%;
     --ring: 230 70% 55%;
-
     --radius: 0.75rem;
-
     --priority-high: 0 72% 51%;
     --priority-medium: 38 92% 50%;
     --priority-low: 142 71% 45%;
-
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
-
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 15% 40%;
     --sidebar-primary: 230 70% 55%;
@@ -51,14 +40,74 @@
     --sidebar-accent-foreground: 230 70% 40%;
     --sidebar-border: 220 15% 92%;
     --sidebar-ring: 230 70% 55%;
-
     --chart-1: 230 70% 55%;
     --chart-2: 142 71% 45%;
     --chart-3: 38 92% 50%;
     --chart-4: 0 72% 51%;
     --chart-5: 280 60% 55%;
-
+    --auth-gradient-from: 230 70% 55%;
+    --auth-gradient-to: 230 80% 70%;
     font-family: 'Inter', sans-serif;
+  }
+
+  .theme-green {
+    --primary: 152 60% 42%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 152 50% 93%;
+    --accent-foreground: 152 60% 30%;
+    --ring: 152 60% 42%;
+    --sidebar-primary: 152 60% 42%;
+    --sidebar-accent: 152 50% 93%;
+    --sidebar-accent-foreground: 152 60% 30%;
+    --sidebar-ring: 152 60% 42%;
+    --auth-gradient-from: 152 60% 42%;
+    --auth-gradient-to: 160 55% 58%;
+  }
+
+  .theme-purple {
+    --primary: 270 60% 55%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 270 50% 94%;
+    --accent-foreground: 270 60% 38%;
+    --ring: 270 60% 55%;
+    --sidebar-primary: 270 60% 55%;
+    --sidebar-accent: 270 50% 94%;
+    --sidebar-accent-foreground: 270 60% 38%;
+    --sidebar-ring: 270 60% 55%;
+    --auth-gradient-from: 270 60% 55%;
+    --auth-gradient-to: 285 65% 68%;
+  }
+
+  .theme-dark {
+    --background: 224 20% 8%;
+    --foreground: 210 20% 92%;
+    --card: 224 18% 12%;
+    --card-foreground: 210 20% 92%;
+    --popover: 224 18% 12%;
+    --popover-foreground: 210 20% 92%;
+    --primary: 230 70% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 224 14% 18%;
+    --secondary-foreground: 210 15% 80%;
+    --muted: 224 14% 18%;
+    --muted-foreground: 215 12% 55%;
+    --accent: 230 30% 20%;
+    --accent-foreground: 230 70% 75%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 224 14% 20%;
+    --input: 224 14% 20%;
+    --ring: 230 70% 60%;
+    --sidebar-background: 224 18% 10%;
+    --sidebar-foreground: 210 15% 70%;
+    --sidebar-primary: 230 70% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 230 30% 18%;
+    --sidebar-accent-foreground: 230 70% 75%;
+    --sidebar-border: 224 14% 18%;
+    --sidebar-ring: 230 70% 60%;
+    --auth-gradient-from: 230 70% 25%;
+    --auth-gradient-to: 250 50% 18%;
   }
 }
 
@@ -77,9 +126,6 @@
   }
   .hover-lift {
     @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
-  }
-  .story-link * {
-    @apply relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left;
   }
   .glass-card {
     @apply bg-card/80 backdrop-blur-sm border shadow-sm;
