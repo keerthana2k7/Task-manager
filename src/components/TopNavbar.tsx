@@ -1,7 +1,7 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CalendarDays, Bell } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 export function TopNavbar() {
   const today = new Date().toLocaleDateString("en-US", {
@@ -21,7 +21,8 @@ export function TopNavbar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        <ThemeSwitcher />
         <button className="relative p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-all duration-200 active:scale-95">
           <Bell className="h-5 w-5" />
           <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-priority-high animate-pulse" />
