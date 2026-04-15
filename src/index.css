@@ -40,6 +40,9 @@
     --priority-medium: 38 92% 50%;
     --priority-low: 142 71% 45%;
 
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 15% 40%;
     --sidebar-primary: 230 70% 55%;
@@ -65,5 +68,20 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-[1.02];
+  }
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+  }
+  .story-link * {
+    @apply relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left;
+  }
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-sm border shadow-sm;
   }
 }
