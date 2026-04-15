@@ -1,16 +1,38 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { AppLayout } from "@/components/AppLayout";
+import { TaskForm } from "@/components/TaskForm";
+import { TaskCard } from "@/components/TaskCard";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const sampleTasks = [
+  { title: "Design homepage mockup", date: "Apr 16, 2026", priority: "high" as const },
+  { title: "Review pull requests", date: "Apr 16, 2026", priority: "medium" as const, completed: true },
+  { title: "Update documentation", date: "Apr 17, 2026", priority: "low" as const },
+  { title: "Fix authentication bug", date: "Apr 15, 2026", priority: "high" as const },
+  { title: "Team standup meeting", date: "Apr 15, 2026", priority: "medium" as const },
+  { title: "Write unit tests", date: "Apr 18, 2026", priority: "low" as const },
+];
+
+const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
-    </div>
+    <AppLayout>
+      <div className="max-w-5xl mx-auto space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground text-sm mt-1">Manage your tasks and stay productive</p>
+        </div>
+
+        <TaskForm />
+
+        <div>
+          <h2 className="text-lg font-semibold mb-3">Your Tasks</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {sampleTasks.map((task, i) => (
+              <TaskCard key={i} {...task} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </AppLayout>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
