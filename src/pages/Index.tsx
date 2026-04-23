@@ -1,134 +1,178 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
-import { TaskForm, type NewTask } from "@/components/TaskForm";
-import { TaskCard, type Task } from "@/components/TaskCard";
-import { ListFilter, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
+import { TaskList } from "@/components/TaskList";
+import { TaskModal } from "@/components/TaskModal";
+import { SearchBar } from "@/components/SearchBar";
+import { FilterBar } from "@/components/FilterBar";
+import { Button } from "@/components/ui/button";
+import { Plus, ListFilter, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const initialTasks: Task[] = [
-  { id: "1", title: "Design homepage mockup", date: "Apr 16, 2026", priority: "high", completed: false },
-  { id: "2", title: "Review pull requests", date: "Apr 16, 2026", priority: "medium", completed: true },
-  { id: "3", title: "Update documentation", date: "Apr 17, 2026", priority: "low", completed: false },
-  { id: "4", title: "Fix authentication bug", date: "Apr 15, 2026", priority: "high", completed: false },
-  { id: "5", title: "Team standup meeting", date: "Apr 15, 2026", priority: "medium", completed: false },
-  { id: "6", title: "Write unit tests", date: "Apr 18, 2026", priority: "low", completed: false },
-];
-
-type Filter = "all" | "active" | "completed";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useTasks, type Task } from "@/context/TaskContext";
+import { filterAndSortTasks, type FilterStatus, type SortBy } from "@/utils/taskFilters";
+import { toast } from "sonner";
 
 const Index = () => {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [filter, setFilter] = useState<Filter>("all");
+  const { tasks, addTask, updateTask, deleteTask, toggleTask } = useTasks();
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<FilterStatus>("all");
+  const [sort, setSort] = useState<SortBy>("date-desc");
 
-  const handleAdd = (newTask: NewTask) => {
-    const task: Task = {
-      id: Date.now().toString(),
-      title: newTask.title,
-      date: new Date(newTask.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      priority: newTask.priority,
-      completed: false,
-    };
-    setTasks((prev) => [task, ...prev]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<Task | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Task | null>(null);
+
+  const filtered = useMemo(
+    () => filterAndSortTasks(tasks, search, status, sort),
+    [tasks, search, status, sort]
+  );
+
+  const stats = useMemo(
+    () => ({
+      total: tasks.length,
+      completed: tasks.filter((t) => t.completed).length,
+      pending: tasks.filter((t) => !t.completed).length,
+      urgent: tasks.filter((t) => t.priority === "high" && !t.completed).length,
+    }),
+    [tasks]
+  );
+
+  const counts = { all: tasks.length, completed: stats.completed, pending: stats.pending };
+
+  const handleNew = () => {
+    setEditing(null);
+    setModalOpen(true);
+  };
+
+  const handleEdit = (task: Task) => {
+    setEditing(task);
+    setModalOpen(true);
+  };
+
+  const handleSave = (data: { title: string; description: string; priority: Task["priority"]; dueDate?: string }) => {
+    if (editing) {
+      updateTask({ ...editing, ...data });
+      toast.success("Task updated");
+    } else {
+      addTask(data);
+      toast.success("Task created");
+    }
+  };
+
+  const confirmDelete = () => {
+    if (pendingDelete) {
+      deleteTask(pendingDelete.id);
+      toast.success("Task deleted");
+      setPendingDelete(null);
+    }
   };
 
   const handleToggle = (id: string) => {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
+    const task = tasks.find((t) => t.id === id);
+    toggleTask(id);
+    if (task && !task.completed) toast.success("Nice work — task completed");
   };
 
-  const handleDelete = (id: string) => {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  const filtered = useMemo(() => {
-    if (filter === "active") return tasks.filter((t) => !t.completed);
-    if (filter === "completed") return tasks.filter((t) => t.completed);
-    return tasks;
-  }, [tasks, filter]);
-
-  const stats = useMemo(() => ({
-    total: tasks.length,
-    completed: tasks.filter((t) => t.completed).length,
-    active: tasks.filter((t) => !t.completed).length,
-    highPriority: tasks.filter((t) => t.priority === "high" && !t.completed).length,
-  }), [tasks]);
-
-  const filters: { key: Filter; label: string }[] = [
-    { key: "all", label: `All (${stats.total})` },
-    { key: "active", label: `Active (${stats.active})` },
-    { key: "completed", label: `Done (${stats.completed})` },
+  const statCards = [
+    { label: "Total", value: stats.total, icon: ListFilter, color: "text-primary" },
+    { label: "Completed", value: stats.completed, icon: CheckCircle2, color: "text-priority-low" },
+    { label: "Pending", value: stats.pending, icon: Clock, color: "text-primary" },
+    { label: "Urgent", value: stats.urgent, icon: AlertTriangle, color: "text-priority-high" },
   ];
 
   return (
     <AppLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
-        <div className="animate-fade-in">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground text-sm mt-1">Manage your tasks and stay productive</p>
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="flex items-start justify-between gap-4 animate-fade-in">
+          <div>
+            <h1 className="text-2xl font-bold">Dashboard</h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              Manage your tasks and stay productive
+            </p>
+          </div>
+          <Button onClick={handleNew} className="shrink-0">
+            <Plus className="h-4 w-4" />
+            New task
+          </Button>
         </div>
 
-        {/* Quick Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 animate-fade-in" style={{ animationDelay: "100ms" }}>
-          {[
-            { label: "Total", value: stats.total, icon: ListFilter, color: "text-primary" },
-            { label: "Completed", value: stats.completed, icon: CheckCircle2, color: "text-priority-low" },
-            { label: "Active", value: stats.active, icon: Clock, color: "text-primary" },
-            { label: "Urgent", value: stats.highPriority, icon: AlertTriangle, color: "text-priority-high" },
-          ].map((s) => (
-            <div key={s.label} className="bg-card rounded-xl border p-4 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+          {statCards.map((s) => (
+            <div
+              key={s.label}
+              className="bg-card rounded-xl border p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
+            >
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground uppercase tracking-wide">{s.label}</p>
                 <s.icon className={cn("h-4 w-4", s.color)} />
               </div>
-              <p className="text-2xl font-bold mt-1 animate-count-up">{s.value}</p>
+              <p className="text-2xl font-bold mt-1">{s.value}</p>
             </div>
           ))}
         </div>
 
-        <div className="animate-fade-in" style={{ animationDelay: "200ms" }}>
-          <TaskForm onAdd={handleAdd} />
+        <div className="space-y-3 animate-fade-in" style={{ animationDelay: "200ms" }}>
+          <SearchBar value={search} onChange={setSearch} />
+          <FilterBar
+            status={status}
+            onStatusChange={setStatus}
+            sort={sort}
+            onSortChange={setSort}
+            counts={counts}
+          />
         </div>
 
-        {/* Filter & Task List */}
         <div className="animate-fade-in" style={{ animationDelay: "300ms" }}>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Your Tasks</h2>
-            <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
-              {filters.map((f) => (
-                <button
-                  key={f.key}
-                  onClick={() => setFilter(f.key)}
-                  className={cn(
-                    "px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200",
-                    filter === f.key
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {filtered.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground animate-fade-in">
-              <p className="text-sm">No tasks found</p>
-            </div>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((task, i) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onToggle={handleToggle}
-                  onDelete={handleDelete}
-                  index={i}
-                />
-              ))}
-            </div>
-          )}
+          <TaskList
+            tasks={filtered}
+            onToggle={handleToggle}
+            onEdit={handleEdit}
+            onDelete={setPendingDelete}
+            emptyTitle={tasks.length === 0 ? "No tasks yet" : "No matching tasks"}
+            emptyDescription={
+              tasks.length === 0
+                ? "Create your first task to get started."
+                : "Try adjusting your search or filters."
+            }
+          />
         </div>
       </div>
+
+      <TaskModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        onSave={handleSave}
+        initial={editing}
+      />
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this task?</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{pendingDelete?.title}" will be permanently removed. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 };
