@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Mail, Lock, CheckSquare, ArrowRight } from "lucide-react";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,6 +14,9 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const validate = () => {
     const e: typeof errors = {};
@@ -24,11 +28,19 @@ const Login = () => {
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = (ev: React.FormEvent) => {
+  const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    setTimeout(() => setLoading(false), 1500);
+    setApiError("");
+    try {
+      await login(email, password);
+      navigate("/");
+    } catch (err: any) {
+      setApiError(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -112,6 +124,10 @@ const Login = () => {
               Forgot password?
             </button>
           </div>
+
+          {apiError && (
+            <p className="text-sm text-destructive text-center animate-fade-in">{apiError}</p>
+          )}
 
           <Button
             type="submit"

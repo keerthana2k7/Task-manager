@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npx vite *)",
+      "Bash(cp -r client frontend)",
+      "Bash(cp -r server backend)",
+      "Bash(rm -rf frontend)",
+      "Bash(rmdir /s /q frontend)",
+      "Bash(rm -rf node_modules)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(cmd /c \"rd /s /q D:\\\\\\\\FSD-mini\\\\\\\\taskmanger\\\\\\\\frontend\")",
+      "Bash(rm -rf frontend/node_modules)",
+      "Bash(rmdir frontend *)",
+      "Bash(ls -d frontend)",
+      "Bash(powershell -Command \"Remove-Item -Path 'D:\\\\FSD-mini\\\\taskmanger\\\\frontend' -Recurse -Force -ErrorAction SilentlyContinue\")",
+      "Bash(powershell -Command \"Rename-Item -Path 'client' -NewName 'frontend'\")",
+      "Bash(powershell -Command \"Rename-Item -Path 'server' -NewName 'backend'\")"
+    ]
+  }
+}

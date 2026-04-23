@@ -1,11 +1,12 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Mail, Lock, User, CheckSquare, ArrowRight } from "lucide-react";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 function getPasswordStrength(pw: string): { score: number; label: string; color: string } {
   let score = 0;
@@ -28,6 +29,9 @@ const Signup = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+  const { signup } = useAuth();
+  const navigate = useNavigate();
 
   const strength = useMemo(() => getPasswordStrength(password), [password]);
 
@@ -43,11 +47,19 @@ const Signup = () => {
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = (ev: React.FormEvent) => {
+  const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    setTimeout(() => setLoading(false), 1500);
+    setApiError("");
+    try {
+      await signup(name, email, password);
+      navigate("/");
+    } catch (err: any) {
+      setApiError(err.response?.data?.message || "Signup failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const field = (
@@ -146,6 +158,10 @@ const Signup = () => {
             show: showConfirm,
             onToggle: () => setShowConfirm(!showConfirm),
           })}
+
+          {apiError && (
+            <p className="text-sm text-destructive text-center animate-fade-in">{apiError}</p>
+          )}
 
           <Button
             type="submit"
